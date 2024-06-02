@@ -1,5 +1,6 @@
 [
 null,
-{"id":1,"expanded":true,"name":"Sala Secreta","order":1,"parentId":0,"scrollX":819,"scrollY":456},
-{"id":2,"expanded":false,"name":"Sala 1 Castelo","order":2,"parentId":0,"scrollX":819,"scrollY":456}
+{"id":1,"expanded":true,"name":"Sala Secreta","order":2,"parentId":0,"scrollX":819,"scrollY":461},
+{"id":2,"expanded":true,"name":"Sala 1 Castelo","order":1,"parentId":0,"scrollX":819,"scrollY":461},
+{"id":3,"expanded":false,"name":"Sala do Trono","order":3,"parentId":0,"scrollX":811,"scrollY":475}
 ]
