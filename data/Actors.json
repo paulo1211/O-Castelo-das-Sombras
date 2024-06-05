@@ -1,7 +1,7 @@
 [
 null,
-{"id":1,"battlerName":"Sir Draven","characterIndex":0,"characterName":"Sir Draven","classId":2,"equips":[2,1,2,3,0],"faceIndex":0,"faceName":"Sir Draven","traits":[],"initialLevel":1,"maxLevel":99,"name":"Sir Draven","nickname":"Sir Draven","note":"","profile":""},
-{"id":2,"battlerName":"PrincesaSeraphina","characterIndex":0,"characterName":"PrincesaSeraphina","classId":5,"equips":[2,1,2,3,0],"faceIndex":0,"faceName":"PrincesaSeraphina","traits":[],"initialLevel":1,"maxLevel":99,"name":"Princesa Seraphina","nickname":"Princesa Seraphina","note":"","profile":""},
-{"id":3,"battlerName":"ReiAlden","characterIndex":0,"characterName":"ReiAlden","classId":6,"equips":[3,0,2,3,4],"faceIndex":0,"faceName":"ReiAlden","traits":[],"initialLevel":1,"maxLevel":99,"name":"Rei Alden","nickname":"Rei Alden","note":"","profile":""},
-{"id":4,"battlerName":"Madame Morgana","characterIndex":0,"characterName":"Madame Morgana","classId":7,"equips":[4,0,2,3,4],"faceIndex":0,"faceName":"Madame Morgana","traits":[],"initialLevel":1,"maxLevel":99,"name":"Madame Morgana","nickname":"Madame Morgana","note":"","profile":""}
+{"id":1,"battlerName":"Sir Draven","characterIndex":0,"characterName":"Sir Draven","classId":2,"equips":[2,1,2,3,0],"faceIndex":0,"faceName":"Sir Draven","traits":[],"initialLevel":1,"maxLevel":50,"name":"Sir Draven","nickname":"Sir Draven","note":"","profile":""},
+{"id":2,"battlerName":"PrincesaSeraphina","characterIndex":0,"characterName":"PrincesaSeraphina","classId":4,"equips":[2,1,2,3,0],"faceIndex":0,"faceName":"PrincesaSeraphina","traits":[],"initialLevel":1,"maxLevel":50,"name":"Princesa Seraphina","nickname":"Princesa Seraphina","note":"","profile":""},
+{"id":3,"battlerName":"ReiAlden","characterIndex":0,"characterName":"ReiAlden","classId":6,"equips":[3,0,2,3,4],"faceIndex":0,"faceName":"ReiAlden","traits":[],"initialLevel":1,"maxLevel":50,"name":"Rei Alden","nickname":"Rei Alden","note":"","profile":""},
+{"id":4,"battlerName":"Madame Morgana","characterIndex":0,"characterName":"Madame Morgana","classId":7,"equips":[4,0,2,3,4],"faceIndex":0,"faceName":"Madame Morgana","traits":[],"initialLevel":1,"maxLevel":50,"name":"Madame Morgana","nickname":"Madame Morgana","note":"","profile":""}
 ]
