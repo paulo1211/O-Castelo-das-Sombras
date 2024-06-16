@@ -1,11 +1,11 @@
 [
 null,
-{"id":1,"expanded":true,"name":"Jardim","order":3,"parentId":0,"scrollX":1390.2857142857142,"scrollY":1138.2857142857142},
-{"id":2,"expanded":false,"name":"Inicio Cutscene","order":5,"parentId":0,"scrollX":1404,"scrollY":781.7142857142857},
+{"id":1,"expanded":true,"name":"Jardim","order":3,"parentId":0,"scrollX":1081.3333333333333,"scrollY":768},
+{"id":2,"expanded":false,"name":"Inicio Cutscene","order":5,"parentId":0,"scrollX":1092,"scrollY":608},
 {"id":3,"expanded":true,"name":"Sala do Trono","order":1,"parentId":0,"scrollX":1404,"scrollY":781.7142857142857},
 {"id":4,"expanded":true,"name":"Sala de Invocação","order":2,"parentId":0,"scrollX":1404,"scrollY":781.7142857142857},
-{"id":5,"expanded":false,"name":"Biblioteca 1","order":4,"parentId":0,"scrollX":1404,"scrollY":781.7142857142857},
+{"id":5,"expanded":false,"name":"Biblioteca 1","order":4,"parentId":0,"scrollX":1092,"scrollY":608},
 {"id":6,"expanded":true,"name":"Sala de Invocação Cutscene","order":6,"parentId":0,"scrollX":1404,"scrollY":781.7142857142857},
 {"id":7,"expanded":true,"name":"Sala do Trono Cutscene","order":7,"parentId":0,"scrollX":1404,"scrollY":781.7142857142857},
-{"id":8,"expanded":true,"name":"Jardim Cutscene","order":8,"parentId":0,"scrollX":1390.2857142857142,"scrollY":879.4285714285713}
+{"id":8,"expanded":true,"name":"Jardim Cutscene","order":8,"parentId":0,"scrollX":1390.2857142857142,"scrollY":781.7142857142857}
 ]

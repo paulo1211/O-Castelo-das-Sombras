@@ -1,14 +1,23 @@
 /*:
  * @plugindesc 
- * [v1.9.5] Provide dynamic lighting to RPG Maker MV/MZ engine, intended to be easiest to start and most flexible when advanced! 
+ * [v1.8.7] Provide dynamic lighting to RPG Maker MV/MZ engine, intended to be easiest to start and most flexible when advanced! 
  * @author Shora
  * @url https://forums.rpgmakerweb.com/index.php?members/shora.158648/
  * @help
  * Forums Post: https://forums.rpgmakerweb.com/index.php?threads/mz-mv-v1-5-released-shora-lighting-plugin-dynamic-2-5d-ambient-shadow-effect.131410/
- * Starting Guide: https://github.com/dattranxxx/-ShoraLighting-/wiki/Getting-Started
+ * Starting Guide: https://github.com/shoraaa/ShoraLightingSystem/wiki/2.-Getting-Started
  * Itch.io Page: https://shoraaa.itch.io/shora-lighting-plugin-demo
  * 
  * Go check the forum post for more info on the plugin, and wiki for an easy start!
+ *
+ * @command Add Static Light
+ * @desc Change the light color in tick(s) time. Use during transition between event pages.
+ * @arg ref
+ * @default default
+ * @arg x
+ * @default 0
+ * @arg y
+ * @default 0
  * 
  * @command Set Light Parameters
  * @desc Change the light color in tick(s) time. Use during transition between event pages.
@@ -43,16 +52,6 @@
  * @text Time
  * @desc Time (in tick) between transtition.
  * @default 60
- * @arg type
- * @text Transition Type
- * @type select
- * @option Not Change
- * @value 
- * @option Linear
- * @value 1
- * @option EaseInOut
- * @value 2
- * @desc The animation movement type. 1 = linear; 2 = easeInOut; Leave empty to use remain light type.
  *
  * @command Set Shadow Ambient
  * @desc Only the dynamic light get effected, the rest will be effected on map change. Change the shadow ambient color in tick(s) time.
@@ -96,7 +95,7 @@
  * @text [Lights: Default]
  * @type struct<LightSettings>
  * @desc The default settings for all light. You can use [light] or [light default] in actor/item note or event comment to use this setting. * 
- * @default {"name":"default","filename":"lights","status":"true","sep0":"","tint":"#ffffff","colorfilter":"{\"hue\":\"0\",\"colortone\":\"rgba(0,0,0,0)\",\"blendcolor\":\"rgba(0,0,0,0)\",\"brightness\":\"255\"}","sep1":"","offset":"{\"x\":\"0\",\"y\":\"0\"}","animation":"{\".Static\":\"=====================\",\"flicker\":\"{\\\"status\\\":\\\"true\\\",\\\"flickintensity\\\":\\\"1\\\",\\\"flickspeed\\\":\\\"1\\\"}\",\".Dynamic\":\"=====================\",\"pulse\":\"{\\\"status\\\":\\\"false\\\",\\\"pulsefactor\\\":\\\"5\\\",\\\"pulsespeed\\\":\\\"1\\\"}\",\"rotation\":\"{\\\"rotatespeed\\\":\\\"1\\\"}\"}","direction":"false","sep4":"","shadow":"true","static":"auto","bwall":"false","shadowambient":"","shadowoffsetx":"0","shadowoffsety":"0"}
+ * @default {"name":"default","filename":"lights","status":"true","sep0":"","tint":"#ffffff","colorfilter":"{\"hue\":\"0\",\"colortone\":\"rgba(0,0,0,0)\",\"blendcolor\":\"rgba(0,0,0,0)\",\"brightness\":\"255\"}","sep1":"","offset":"{\"x\":\"0\",\"y\":\"0\"}","animation":"{\".Static\":\"=====================\",\"flicker\":\"{\\\"status\\\":\\\"true\\\",\\\"flickintensity\\\":\\\"1\\\",\\\"flickspeed\\\":\\\"1\\\"}\",\".Dynamic\":\"=====================\",\"pulse\":\"{\\\"status\\\":\\\"false\\\",\\\"pulsefactor\\\":\\\"1\\\",\\\"pulsespeed\\\":\\\"1\\\"}\",\"rotation\":\"{\\\"rotatespeed\\\":\\\"1\\\"}\"}","direction":"false","sep4":"","shadow":"true","static":"auto","bwall":"false","shadowambient":"","shadowoffsetx":"0","shadowoffsety":"0"}
  *  
  * 
  * @param LightList
@@ -121,7 +120,7 @@
  * @text [Advanced: Filters]
  * @type struct<FilterSettings>
  * @desc Apply filter to the whole map for better light intensity and blending. Can be called using $shoraLayer.colorFilter
- * @default {"status":"false","sep0":"","brightness":"1.25"}
+ * @default {"status":"false","sep0":"","brightness":"1.3"}
  */
 
 /*~struct~GameSettings:
@@ -144,17 +143,6 @@
  * @text [Ignore-Shadow: Id]
  * @desc Region id specified for tile that shadow cannot be cast to, mean that it will always be light here.
  * @default 51
- * 
- * @param wallID
- * @text [Terrain Tags: Wall]
- * @desc Terrain tags specified for tile that is wall.
- * @default 1
- * 
- * @param topID
- * @text [Terrain Tags: Top Wall]
- * @desc Terrain tags specified for tile that is top wall.
- * @default 2
- * 
  */
 
 /*~struct~MapSettings:
@@ -279,10 +267,10 @@
  * @default false
  * 
  * @param pulsefactor
- * @text Range
+ * @text Factor
  * @type number
- * @desc The percentage of radius that light will pulse (Ex: 5% -> 95-105)
- * @default 5
+ * @desc The intensity for flick animation.
+ * @default 1
  * 
  * @param pulsespeed
  * @text Speed
@@ -364,7 +352,7 @@
  * @text [Advanced: Animation]
  * @type struct<AnimationSettings>
  * @desc The animation setting for default light.
- * @default {".Static":"=====================","flicker":"{\"status\":\"true\",\"flickintensity\":\"1\",\"flickspeed\":\"1\"}",".Dynamic":"=====================","pulse":"{\"status\":\"false\",\"pulsefactor\":\"5\",\"pulsespeed\":\"1\"}","rotation":"{\"rotatespeed\":\"1\"}"}
+ * @default {".Static":"=====================","flicker":"{\"status\":\"true\",\"flickintensity\":\"1\",\"flickspeed\":\"1\"}",".Dynamic":"=====================","pulse":"{\"status\":\"false\",\"pulsefactor\":\"1\",\"pulsespeed\":\"1\"}","rotation":"{\"rotatespeed\":\"1\"}"}
  * 
  * @param sep4
  * @text ==================================
@@ -409,7 +397,7 @@
  * @param brightness
  * @text - Value
  * @desc The default brightness value. Leave blank for not apply.
- * @default 1.5
+ * @default 1.3
  * 
  * @param sep
  * @text ==================================
@@ -447,19 +435,16 @@
  * @param color
  * @default #ffffff
 */
-
-
-/* Core helper functions and plugin commands interface for MV/MZ. */
+// Contains initialize stuff & MV/MZ overload (plugin command iterface)
 
 var Shora = Shora || {};
 Shora.Lighting = {};
 Shora.Lighting.pluginName = '-ShoraLighting-';
-Shora.Lighting.VERSION = 2.0;
+Shora.Lighting.VERSION = '1.8.7';
 Shora.Lighting.PARAMETERS = PluginManager.parameters(Shora.Lighting.pluginName);
 
-Shora.isMV = PIXI.VERSION[0] < 5;
-
 Shora.tempGraphics = new PIXI.Graphics();
+
 // Shora.tempMatrix = new PIXI.Matrix();
 // Shora.tempRenderTexture = PIXI.RenderTexture.create(1280, 720);
 // Shora.maskTexture = PIXI.RenderTexture.create(1280, 720);
@@ -470,7 +455,7 @@ Shora.REGEX = {
     TAG: /\[([\w_\d]+)\]/,
     COMMAND: /\[([\w_\d]+)\s(-?[\w_\d]+)\]/,
     DOUBLE_COMMAND: /\[([\w_\d]+)\s(-?[\w_\d]+)\s(-?[\w_\d]+)\]/
-}; 
+};
 
 // Color Helper
 Shora.Color = {};
@@ -480,6 +465,259 @@ Shora.warn = function(err) {
     const message = new PIXI.Text('Shora Lighting Plugin: ' + err, {fontFamily : 'Arial', fontSize: 12, fill : 0xffffff, align : 'left'});
     message.y += Shora.MessageY; Shora.MessageY += message.height;
     if (Graphics.app.stage) Graphics.app.stage.addChild(message);
+}
+
+Shora.EngineVersion = PIXI.VERSION[0] < 5 ? 'MV' : 'MZ';
+
+/* overload for rpgm mv */
+if (Shora.EngineVersion == 'MV') {
+
+    ((_) => {
+        const _createRenderer = Graphics._createRenderer;
+        Graphics._createRenderer = function() {
+            _createRenderer.call(this);
+            this.app = { renderer: this._renderer };
+        };
+    })(Graphics); 
+
+    ImageManager.loadLight = function(filename) {
+        return this.loadBitmap('img/lights/', filename.substring(0, filename.length - 4), true);
+    };
+    /**
+     * The color filter for WebGL.
+     *
+     * @class
+     * @extends PIXI.Filter
+     */
+     function ColorFilter() {
+        this.initialize(...arguments);
+    }
+
+    ColorFilter.prototype = Object.create(PIXI.Filter.prototype);
+    ColorFilter.prototype.constructor = ColorFilter;
+
+    ColorFilter.prototype.initialize = function() {
+        PIXI.Filter.call(this, null, this._fragmentSrc());
+        this.uniforms.hue = 0;
+        this.uniforms.colorTone = [0, 0, 0, 0];
+        this.uniforms.blendColor = [0, 0, 0, 0];
+        this.uniforms.brightness = 255;
+    };
+
+    /**
+     * Sets the hue rotation value.
+     *
+     * @param {number} hue - The hue value (-360, 360).
+     */
+    ColorFilter.prototype.setHue = function(hue) {
+        this.uniforms.hue = Number(hue);
+    };
+
+    /**
+     * Sets the color tone.
+     *
+     * @param {array} tone - The color tone [r, g, b, gray].
+     */
+    ColorFilter.prototype.setColorTone = function(tone) {
+        if (!(tone instanceof Array)) {
+            throw new Error("Argument must be an array");
+        }
+        this.uniforms.colorTone = tone.clone();
+    };
+
+    /**
+     * Sets the blend color.
+     *
+     * @param {array} color - The blend color [r, g, b, a].
+     */
+    ColorFilter.prototype.setBlendColor = function(color) {
+        if (!(color instanceof Array)) {
+            throw new Error("Argument must be an array");
+        }
+        this.uniforms.blendColor = color.clone();
+    };
+
+    /**
+     * Sets the brightness.
+     *
+     * @param {number} brightness - The brightness (0 to 255).
+     */
+    ColorFilter.prototype.setBrightness = function(brightness) {
+        this.uniforms.brightness = Number(brightness);
+    };
+
+    ColorFilter.prototype._fragmentSrc = function() {
+        const src =
+            "varying vec2 vTextureCoord;" +
+            "uniform sampler2D uSampler;" +
+            "uniform float hue;" +
+            "uniform vec4 colorTone;" +
+            "uniform vec4 blendColor;" +
+            "uniform float brightness;" +
+            "vec3 rgbToHsl(vec3 rgb) {" +
+            "  float r = rgb.r;" +
+            "  float g = rgb.g;" +
+            "  float b = rgb.b;" +
+            "  float cmin = min(r, min(g, b));" +
+            "  float cmax = max(r, max(g, b));" +
+            "  float h = 0.0;" +
+            "  float s = 0.0;" +
+            "  float l = (cmin + cmax) / 2.0;" +
+            "  float delta = cmax - cmin;" +
+            "  if (delta > 0.0) {" +
+            "    if (r == cmax) {" +
+            "      h = mod((g - b) / delta + 6.0, 6.0) / 6.0;" +
+            "    } else if (g == cmax) {" +
+            "      h = ((b - r) / delta + 2.0) / 6.0;" +
+            "    } else {" +
+            "      h = ((r - g) / delta + 4.0) / 6.0;" +
+            "    }" +
+            "    if (l < 1.0) {" +
+            "      s = delta / (1.0 - abs(2.0 * l - 1.0));" +
+            "    }" +
+            "  }" +
+            "  return vec3(h, s, l);" +
+            "}" +
+            "vec3 hslToRgb(vec3 hsl) {" +
+            "  float h = hsl.x;" +
+            "  float s = hsl.y;" +
+            "  float l = hsl.z;" +
+            "  float c = (1.0 - abs(2.0 * l - 1.0)) * s;" +
+            "  float x = c * (1.0 - abs((mod(h * 6.0, 2.0)) - 1.0));" +
+            "  float m = l - c / 2.0;" +
+            "  float cm = c + m;" +
+            "  float xm = x + m;" +
+            "  if (h < 1.0 / 6.0) {" +
+            "    return vec3(cm, xm, m);" +
+            "  } else if (h < 2.0 / 6.0) {" +
+            "    return vec3(xm, cm, m);" +
+            "  } else if (h < 3.0 / 6.0) {" +
+            "    return vec3(m, cm, xm);" +
+            "  } else if (h < 4.0 / 6.0) {" +
+            "    return vec3(m, xm, cm);" +
+            "  } else if (h < 5.0 / 6.0) {" +
+            "    return vec3(xm, m, cm);" +
+            "  } else {" +
+            "    return vec3(cm, m, xm);" +
+            "  }" +
+            "}" +
+            "void main() {" +
+            "  vec4 sample = texture2D(uSampler, vTextureCoord);" +
+            "  float a = sample.a;" +
+            "  vec3 hsl = rgbToHsl(sample.rgb);" +
+            "  hsl.x = mod(hsl.x + hue / 360.0, 1.0);" +
+            "  hsl.y = hsl.y * (1.0 - colorTone.a / 255.0);" +
+            "  vec3 rgb = hslToRgb(hsl);" +
+            "  float r = rgb.r;" +
+            "  float g = rgb.g;" +
+            "  float b = rgb.b;" +
+            "  float r2 = colorTone.r / 255.0;" +
+            "  float g2 = colorTone.g / 255.0;" +
+            "  float b2 = colorTone.b / 255.0;" +
+            "  float r3 = blendColor.r / 255.0;" +
+            "  float g3 = blendColor.g / 255.0;" +
+            "  float b3 = blendColor.b / 255.0;" +
+            "  float i3 = blendColor.a / 255.0;" +
+            "  float i1 = 1.0 - i3;" +
+            "  r = clamp((r / a + r2) * a, 0.0, 1.0);" +
+            "  g = clamp((g / a + g2) * a, 0.0, 1.0);" +
+            "  b = clamp((b / a + b2) * a, 0.0, 1.0);" +
+            "  r = clamp(r * i1 + r3 * i3 * a, 0.0, 1.0);" +
+            "  g = clamp(g * i1 + g3 * i3 * a, 0.0, 1.0);" +
+            "  b = clamp(b * i1 + b3 * i3 * a, 0.0, 1.0);" +
+            "  r = r * brightness / 255.0;" +
+            "  g = g * brightness / 255.0;" +
+            "  b = b * brightness / 255.0;" +
+            "  gl_FragColor = vec4(r, g, b, a);" +
+            "}";
+        return src;
+    };
+
+    // Plugin Command (MV)
+    var _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
+    Game_Interpreter.prototype.pluginCommand = function(command, args) {
+        _Game_Interpreter_pluginCommand.call(this, command, args);
+        if (command) {
+            command = command.toLowerCase();
+            if (command === 'ambient') {
+                $gameLighting.setMapAmbient(args[0], args[1]);
+            } else if (command === 'shadowambient') {
+                $gameLighting.setShadowAmbient(args[0]);
+            } else if (command === 'topblockambient') {
+                $gameLighting.setTopBlockAmbient(args[0]);
+            } else if (command === 'offset' || command === 'offsetx' || command === 'offsety' || 
+                        command === 'tint' || command === 'radius' || command === 'angle' || 
+                        command === 'status' || command === 'shadow') {
+                let id = args[0] == '=' ? this._eventId : Number(args[0]);
+                if (command === 'offset') {
+                    $gameLighting.setOffset(id, args[1], args[2], args[3], args[4]);
+                } else if (command === 'offsetx') {
+                    $gameLighting.setOffsetX(id, args[1], args[2], args[3]);
+                } else if (command === 'offsety') {
+                    $gameLighting.setOffsetY(id, args[1], args[2], args[3]);
+                } else if (command === 'tint') {
+                    $gameLighting.setTint(id, args[1], args[2], args[3]);
+                } else if (command === 'radius') {
+                    $gameLighting.setRadius(id, args[1], args[2], args[3]);
+                } else if (command === 'angle') {
+                    $gameLighting.setAngle(id, args[1], args[2], args[3]);
+                } else if (command === 'status') {
+                    $gameLighting.setStatus(id, args[1]);
+                } else if (command === 'shadow')
+                    $gameLighting.setShadow(id, args[1]);
+            }
+        }
+    }
+} else {
+    ImageManager.loadLight = function(filename) {
+        const url = 'img/lights/' + Utils.encodeURI(filename);
+        return Bitmap.load(url);
+    };
+
+    const { pluginName } = Shora.Lighting;
+
+    // Add new statical light into map
+    PluginManager.registerCommand(pluginName, 'Add Static Light', args => {
+        $gameLighting.addStaticLight(Number(args.x), Number(args.y), args.ref);
+    });
+
+    // Change map ambient color
+    PluginManager.registerCommand(pluginName, 'Set Map Ambient', args => {
+        $gameLighting.setMapAmbient(args.color, Number(args.time) || 0);
+    });
+
+    // Change shadow ambient color
+    PluginManager.registerCommand(pluginName, 'Set Shadow Ambient', args => {
+        $gameLighting.setShadowAmbient(args.color);
+    });
+
+    // Change Top Block ambient color
+    PluginManager.registerCommand(pluginName, 'Set Top Block Ambient', args => {
+        $gameLighting.setTopBlockAmbient(args.color);
+    });
+
+    // Set light color
+    PluginManager.registerCommand(pluginName, 'Set Light Parameters', function(args) {
+        let id = args.id == "" ? this._eventId : Number(args.id);
+        if ($gameMap._lighting[id]) {
+            let time = Number(args.time);
+            let type = Number(args.type);
+            let params = JSON.parse(args.parameters);
+            if (params.offset !== "") {
+                params.offset = JSON.parse(params.offset);
+                $gameLighting.setOffsetX(id, params.offset.x, time, type);
+                $gameLighting.setOffsetY(id, params.offset.y, time, type);
+            }
+            $gameLighting.setStatus(id, params.status);
+            $gameLighting.setShadow(id, params.shadow);
+            $gameLighting.setRadius(id, params.radius, time, type);
+            $gameLighting.setAngle(id, params.angle, time, type);
+            $gameLighting.setTint(id, params.tint, time, type);
+        } else {
+            Shora.warn('Event ' + id + " doesn't have a light to change parameter.");
+        }
+    });
+
 }
 
 Shora.CallCommand = function(settings, command) {
@@ -540,6 +778,42 @@ Shora.CallCommand = function(settings, command) {
     
 };
 
+Array.prototype.lowerBound = function(x) {
+    // return minimum i that a[i] >= x
+    let lo = 0, hi = this.length - 1, mid, res = -1;
+    while (lo <= hi) {
+        mid = (lo + hi) >> 1;
+        if (a[mid] >= x) {
+            res = mid;
+            hi = mid - 1;
+        } else lo = mid + 1;
+    }
+    return res;
+};
+Array.prototype.floorSearch = function(x) {
+    // return minimum i that a[i] <= x
+    let lo = 0, hi = this.length - 1, mid, res = -1;
+    while (lo <= hi) {
+        mid = (lo + hi) >> 1;
+        if (a[mid] <= x) {
+            res = mid;
+            lo = mid + 1;
+        } else hi = mid - 1;
+    }
+    return res;
+};
+Array.prototype.pairFloorSearch = function(x, j) {
+    // return minimum i that a[i][j] <= x
+    let lo = 0, hi = this.length - 1, mid, res = -1;
+    while (lo <= hi) {
+        mid = (lo + hi) >> 1;
+        if (this[mid][j] <= x) {
+            res = mid;
+            lo = mid + 1;
+        } else hi = mid - 1;
+    }
+    return res;
+};
 String.prototype.toHexValue = function() {
     if (Shora.Color[this]) return Shora.Color[this];
     if (this.length == 6) return parseInt(this, 16);
@@ -732,367 +1006,13 @@ class KawaseBlurFilter extends PIXI.Filter {
         this._blur = value;
         this._generateKernels();
     }
-}
-
-// remove engine shadow
+}// remove engine shadow
 if (JSON.parse(Shora.Lighting.PARAMETERS.helper).disableEngineShadow === 'true') {
     Tilemap.prototype._addShadow = function() {}; 
-    if (Shora.isMV) {
+    if (Shora.EngineVersion === 'MV')
         ShaderTilemap.prototype._addShadow = function() {}; 
-        ShaderTilemap.prototype._drawShadow = function() {};
-    }
 }
 
-const TextureManager = {
-    /**
-     * Return a filtered texture.
-     * @param {PIXI.BaseTexture} baseTexture 
-     * @param {Object} colorFilter 
-     */
-    filter: function(options) {
-        if ($shoraLayer.textureCache[options.name])
-            return new PIXI.Sprite($shoraLayer.textureCache[options.name]);
-        let baseTexture = $shoraLayer.load(options.filename);
-        let sprite = new PIXI.Sprite(new PIXI.Texture(baseTexture));
-        let colorFilter = options.colorfilter;
-        let filter = new ColorFilter();
-		filter.setBrightness(colorFilter.brightness || 255);
-		filter.setHue(colorFilter.hue === -1 ? Math.random() * 360 : colorFilter.hue);
-		filter.setColorTone(colorFilter.colortone || [0, 0, 0, 0]); // 8, 243, 242, 194
-		filter.setBlendColor(colorFilter.blendcolor || [0, 0, 0, 0]); // 96, 151, 221, 229
-		sprite.filters = [filter];
-        let renderedTexture = Graphics.app.renderer.generateTexture(sprite, 1, 1, sprite.getBounds());
-        sprite.filters = null;
-		sprite.destroy({texture: true});
-        $shoraLayer.textureCache[options.name] = renderedTexture;
-		return new PIXI.Sprite(renderedTexture);
-    }
-};
-
-
-
-if (Shora.isMV) {
-
-    ((_) => {
-        const _createRenderer = Graphics._createRenderer;
-        Graphics._createRenderer = function() {
-            _createRenderer.call(this);
-            this.app = { renderer: this._renderer };
-        };
-    })(Graphics); 
-    
-    ImageManager.loadLight = function(filename) {
-        return this.loadBitmap('img/lights/', filename.substring(0, filename.length - 4), true);
-    };
-    /**
-     * The color filter for WebGL.
-     *
-     * @class
-     * @extends PIXI.Filter
-     */
-        function ColorFilter() {
-        this.initialize(...arguments);
-    }
-    
-    ColorFilter.prototype = Object.create(PIXI.Filter.prototype);
-    ColorFilter.prototype.constructor = ColorFilter;
-    
-    ColorFilter.prototype.initialize = function() {
-        PIXI.Filter.call(this, null, this._fragmentSrc());
-        this.uniforms.hue = 0;
-        this.uniforms.colorTone = [0, 0, 0, 0];
-        this.uniforms.blendColor = [0, 0, 0, 0];
-        this.uniforms.brightness = 255;
-    };
-    
-    /**
-     * Sets the hue rotation value.
-     *
-     * @param {number} hue - The hue value (-360, 360).
-     */
-    ColorFilter.prototype.setHue = function(hue) {
-        this.uniforms.hue = Number(hue);
-    };
-    
-    /**
-     * Sets the color tone.
-     *
-     * @param {array} tone - The color tone [r, g, b, gray].
-     */
-    ColorFilter.prototype.setColorTone = function(tone) {
-        if (!(tone instanceof Array)) {
-            throw new Error("Argument must be an array");
-        }
-        this.uniforms.colorTone = tone.clone();
-    };
-    
-    /**
-     * Sets the blend color.
-     *
-     * @param {array} color - The blend color [r, g, b, a].
-     */
-    ColorFilter.prototype.setBlendColor = function(color) {
-        if (!(color instanceof Array)) {
-            throw new Error("Argument must be an array");
-        }
-        this.uniforms.blendColor = color.clone();
-    };
-    
-    /**
-     * Sets the brightness.
-     *
-     * @param {number} brightness - The brightness (0 to 255).
-     */
-    ColorFilter.prototype.setBrightness = function(brightness) {
-        this.uniforms.brightness = Number(brightness);
-    };
-    
-    ColorFilter.prototype._fragmentSrc = function() {
-        const src =
-            "varying vec2 vTextureCoord;" +
-            "uniform sampler2D uSampler;" +
-            "uniform float hue;" +
-            "uniform vec4 colorTone;" +
-            "uniform vec4 blendColor;" +
-            "uniform float brightness;" +
-            "vec3 rgbToHsl(vec3 rgb) {" +
-            "  float r = rgb.r;" +
-            "  float g = rgb.g;" +
-            "  float b = rgb.b;" +
-            "  float cmin = min(r, min(g, b));" +
-            "  float cmax = max(r, max(g, b));" +
-            "  float h = 0.0;" +
-            "  float s = 0.0;" +
-            "  float l = (cmin + cmax) / 2.0;" +
-            "  float delta = cmax - cmin;" +
-            "  if (delta > 0.0) {" +
-            "    if (r == cmax) {" +
-            "      h = mod((g - b) / delta + 6.0, 6.0) / 6.0;" +
-            "    } else if (g == cmax) {" +
-            "      h = ((b - r) / delta + 2.0) / 6.0;" +
-            "    } else {" +
-            "      h = ((r - g) / delta + 4.0) / 6.0;" +
-            "    }" +
-            "    if (l < 1.0) {" +
-            "      s = delta / (1.0 - abs(2.0 * l - 1.0));" +
-            "    }" +
-            "  }" +
-            "  return vec3(h, s, l);" +
-            "}" +
-            "vec3 hslToRgb(vec3 hsl) {" +
-            "  float h = hsl.x;" +
-            "  float s = hsl.y;" +
-            "  float l = hsl.z;" +
-            "  float c = (1.0 - abs(2.0 * l - 1.0)) * s;" +
-            "  float x = c * (1.0 - abs((mod(h * 6.0, 2.0)) - 1.0));" +
-            "  float m = l - c / 2.0;" +
-            "  float cm = c + m;" +
-            "  float xm = x + m;" +
-            "  if (h < 1.0 / 6.0) {" +
-            "    return vec3(cm, xm, m);" +
-            "  } else if (h < 2.0 / 6.0) {" +
-            "    return vec3(xm, cm, m);" +
-            "  } else if (h < 3.0 / 6.0) {" +
-            "    return vec3(m, cm, xm);" +
-            "  } else if (h < 4.0 / 6.0) {" +
-            "    return vec3(m, xm, cm);" +
-            "  } else if (h < 5.0 / 6.0) {" +
-            "    return vec3(xm, m, cm);" +
-            "  } else {" +
-            "    return vec3(cm, m, xm);" +
-            "  }" +
-            "}" +
-            "void main() {" +
-            "  vec4 sample = texture2D(uSampler, vTextureCoord);" +
-            "  float a = sample.a;" +
-            "  vec3 hsl = rgbToHsl(sample.rgb);" +
-            "  hsl.x = mod(hsl.x + hue / 360.0, 1.0);" +
-            "  hsl.y = hsl.y * (1.0 - colorTone.a / 255.0);" +
-            "  vec3 rgb = hslToRgb(hsl);" +
-            "  float r = rgb.r;" +
-            "  float g = rgb.g;" +
-            "  float b = rgb.b;" +
-            "  float r2 = colorTone.r / 255.0;" +
-            "  float g2 = colorTone.g / 255.0;" +
-            "  float b2 = colorTone.b / 255.0;" +
-            "  float r3 = blendColor.r / 255.0;" +
-            "  float g3 = blendColor.g / 255.0;" +
-            "  float b3 = blendColor.b / 255.0;" +
-            "  float i3 = blendColor.a / 255.0;" +
-            "  float i1 = 1.0 - i3;" +
-            "  r = clamp((r / a + r2) * a, 0.0, 1.0);" +
-            "  g = clamp((g / a + g2) * a, 0.0, 1.0);" +
-            "  b = clamp((b / a + b2) * a, 0.0, 1.0);" +
-            "  r = clamp(r * i1 + r3 * i3 * a, 0.0, 1.0);" +
-            "  g = clamp(g * i1 + g3 * i3 * a, 0.0, 1.0);" +
-            "  b = clamp(b * i1 + b3 * i3 * a, 0.0, 1.0);" +
-            "  r = r * brightness / 255.0;" +
-            "  g = g * brightness / 255.0;" +
-            "  b = b * brightness / 255.0;" +
-            "  gl_FragColor = vec4(r, g, b, a);" +
-            "}";
-        return src;
-    };
-    
-    // Plugin Command (MV)
-    var _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-    Game_Interpreter.prototype.pluginCommand = function(command, args) {
-        _Game_Interpreter_pluginCommand.call(this, command, args);
-        if (command) {
-            command = command.toLowerCase();
-            if (command === 'ambient') {
-                $gameLighting.setMapAmbient(args[0], args[1]);
-            } else if (command === 'shadowambient') {
-                $gameLighting.setShadowAmbient(args[0]);
-            } else if (command === 'topblockambient') {
-                $gameLighting.setTopBlockAmbient(args[0]);
-            } else if (command === 'offset' || command === 'offsetx' || command === 'offsety' || 
-                        command === 'tint' || command === 'radius' || command === 'angle' || 
-                        command === 'status' || command === 'shadow') {
-                let id = args[0] == '=' ? this._eventId : Number(args[0]);
-                if (command === 'offset') {
-                    $gameLighting.setOffset(id, args[1], args[2], args[3], args[4]);
-                } else if (command === 'offsetx') {
-                    $gameLighting.setOffsetX(id, args[1], args[2], args[3]);
-                } else if (command === 'offsety') {
-                    $gameLighting.setOffsetY(id, args[1], args[2], args[3]);
-                } else if (command === 'tint') {
-                    $gameLighting.setTint(id, args[1], args[2], args[3]);
-                } else if (command === 'radius') {
-                    $gameLighting.setRadius(id, args[1], args[2], args[3]);
-                } else if (command === 'angle') {
-                    $gameLighting.setAngle(id, args[1], args[2], args[3]);
-                } else if (command === 'status') {
-                    $gameLighting.setStatus(id, args[1]);
-                } else if (command === 'shadow')
-                    $gameLighting.setShadow(id, args[1]);
-            }
-        }
-    }
-}
-
-
-
-if (!Shora.isMV) {
-
-    ImageManager.loadLight = function(filename) {
-        const url = 'img/lights/' + Utils.encodeURI(filename);
-        return Bitmap.load(url);
-    };
-    
-    const { pluginName } = Shora.Lighting;
-    
-    // Add new statical light into map
-    PluginManager.registerCommand(pluginName, 'Add Static Light', args => {
-        $gameLighting.addStaticLight(Number(args.x), Number(args.y), args.ref);
-    });
-    
-    // Change map ambient color
-    PluginManager.registerCommand(pluginName, 'Set Map Ambient', args => {
-        $gameLighting.setMapAmbient(args.color, Number(args.time) || 0, Number(args.type) || 0);
-    });
-    
-    // Change shadow ambient color
-    PluginManager.registerCommand(pluginName, 'Set Shadow Ambient', args => {
-        $gameLighting.setShadowAmbient(args.color);
-    });
-    
-    // Change Top Block ambient color
-    PluginManager.registerCommand(pluginName, 'Set Top Block Ambient', args => {
-        $gameLighting.setTopBlockAmbient(args.color);
-    });
-    
-    // Set light color
-    PluginManager.registerCommand(pluginName, 'Set Light Parameters', function(args) {
-        let id = args.id == "" ? this._eventId : Number(args.id);
-        if ($gameMap._lighting[id]) {
-            let time = Number(args.time);
-            let type = Number(args.type);
-            let params = JSON.parse(args.parameters);
-            if (params.offset !== "") {
-                params.offset = JSON.parse(params.offset);
-                $gameLighting.setOffsetX(id, params.offset.x, time, type);
-                $gameLighting.setOffsetY(id, params.offset.y, time, type);
-            }
-            $gameLighting.setStatus(id, params.status);
-            $gameLighting.setShadow(id, params.shadow);
-            $gameLighting.setRadius(id, params.radius, time, type);
-            $gameLighting.setAngle(id, params.angle, time, type);
-            $gameLighting.setTint(id, params.tint, time, type);
-        }
-    });
-    
-    LightingShaderGenerator = new PIXI.BatchShaderGenerator(`
-        precision highp float;
-        attribute vec2 aVertexPosition;
-        attribute vec2 aTextureCoord;
-        attribute vec4 aColor;
-        attribute float aTextureId;
-        
-        uniform mat3 projectionMatrix;
-        uniform mat3 translationMatrix;
-        uniform vec4 tint;
-        
-        varying vec2 vTextureCoord;
-        varying vec4 vColor;
-        varying float vTextureId;
-        
-        void main(void){
-            gl_Position = vec4((projectionMatrix * translationMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
-        
-            vTextureCoord = aTextureCoord;
-            vTextureId = aTextureId;
-            vColor = aColor * tint;
-        }
-    `, `
-        varying vec2 vTextureCoord;
-        varying vec4 vColor;
-        varying float vTextureId;
-        uniform sampler2D uSamplers[%count%];
-    
-        void main(void){
-            vec4 color;
-            %forloop%
-            gl_FragColor = color * vColor;
-        }
-    `);
-    
-    LightingShaderGenerator.generateSampleSrc = function(maxTextures)
-    {
-        var src = '';
-    
-        src += '\n';
-        src += '\n';
-    
-        maxTextures /= 2;
-    
-        for (var i = 0; i < maxTextures; i++)
-        {
-            if (i > 0)
-            {
-                src += '\nelse ';
-            }
-    
-            if (i < maxTextures - 1)
-            {
-                src += "if(vTextureId < " + i + ".5)";
-            }
-    
-            src += '\n{';
-            src += "\n\tcolor = texture2D(uSamplers[" + i + "], vTextureCoord);";
-            src += "\n\tcolor = color * texture2D(uSamplers[" + (maxTextures * 2 - i - 1) + "], vTextureCoord);";
-            src += '\n}';
-        }
-    
-        src += '\n';
-        src += '\n';
-    
-        return src;
-    };
-}
-
-
-/* Override MV/MZ functions. */
 
 // Sprite
 ((_) => {
@@ -1154,31 +1074,6 @@ if (!Shora.isMV) {
     }
 })(Spriteset_Map.prototype);
 
-// Spriteset_Battle
-((_) => {
-    _.type = () => 'battle';
-    const destroy = _.destroy;
-    _.destroy = function(options) {
-        if ($shoraLayer.lighting) 
-            $shoraLayer.removeScene(this);
-        destroy.call(this, options);
-    }
-    const createUpperLayer = _.createUpperLayer;
-    _.createUpperLayer = function() {
-        if (!$gameLighting._disabled && !$gameLighting._battleLightingDisabled)
-            $shoraLayer.loadScene(this);
-        createUpperLayer.call(this);
-    }
-
-    const update = _.update;
-    _.update = function() {
-        update.call(this);
-        if (!$gameLighting._disabled && !$gameLighting._battleLightingDisabled)
-            $shoraLayer.update();
-    }
-})(Spriteset_Battle.prototype);
-
-
 // Game_Map
 ((_) => {
     const setup = _.setup;
@@ -1188,32 +1083,37 @@ if (!Shora.isMV) {
         this._staticLighting = [];
         if ($dataMap) {
             this.scanNoteTags($dataMap.note.split('\n'));
+            this.scanTileNoteTag(this.tileset().note.split('\n'));
         }
     }
 
     _.scanNoteTags = function(lines) {
-
-        this.lightingState = !$gameLighting._disabled, 
-        this.lightingAmbient = $gameLighting.ambient;
-
         for (command of lines) {
             command = command.match(Shora.REGEX.COMMAND);
             if (!command) continue;
             switch (command[1].toLowerCase()) {
-                case 'lighting':
-                    this.lightingState = command[2] === 'on';
-                    break;
                 case 'ambient': 
-                    this.lightingAmbient = command[2].toHexValue();
+                    if ($shoraLayer.lighting)
+                        $gameLighting.setMapAmbient(command[2]);
+                    else 
+                        $gameLighting.ambient = command[2].toHexValue();
+                break;
+                case 'shadowambient':
+                    $gameShadow.shadowAmbient = command[2].toHexValue();
                     break;
+                case 'topBlockAmbient':
+                    $gameShadow.topBlockAmbient = command[2].toHexValue();
+                    break;
+
             }
         }
+    }
 
+    _.scanTileNoteTag = function() {
+        //
     }
 
 })(Game_Map.prototype);
-
-
 
 // Game_Character
 ((_) => {
@@ -1254,7 +1154,7 @@ if (!Shora.isMV) {
     const gainItem = _.gainItem;
     _.gainItem = function(item, amount, includeEquip) {
         gainItem.call(this, item, amount, includeEquip);
-        $gamePlayer.scanLighting();
+        $gamePlayer.scanItemLighting();
     }
 
 })(Game_Party.prototype);
@@ -1276,16 +1176,19 @@ if (!Shora.isMV) {
         if (lightingParams.name) {
             this.setLighting(lightingParams);
         } else {
-        	lightingParams = {id: 0};
-            for (const item of $gameParty.items()) {
-                const note = item.note.split('\n');
-                for (let line of note)
-                    Shora.CallCommand(lightingParams, line);
-                if (lightingParams.name) 
-                    return this.setLighting(lightingParams);
-            }
-        	this.hasLight = false;
+        	this.scanItemLighting();
         }
+    }
+    _.scanItemLighting = function() {
+        let lightingParams = {id: 0};
+        for (const item of $gameParty.items()) {
+            const note = item.note.split('\n');
+            for (let line of note)
+                Shora.CallCommand(lightingParams, line);
+            if (lightingParams.name) 
+                return this.setLighting(lightingParams);
+        }
+        this.hasLight = false;
     }
     _.setLighting = function(params) {
         if (this.hasLight) {
@@ -1331,8 +1234,6 @@ if (!Shora.isMV) {
 
 })(Game_Event.prototype);
 
-
-/* Lighting layer, contain ambient layer and lights layer. */
 class Layer {
     constructor() {
         this.baseTextureCache = {}; // TODO: Wait for texture to load
@@ -1359,8 +1260,6 @@ class Layer {
         this._topRegionId = Number(GAME_PARAMETERS.topRegionId);
         this._ignoreShadowsId = Number(GAME_PARAMETERS.ignoreShadowsId);
         this._drawBelowPicture = GAME_PARAMETERS.drawBelowPicture === 'true';
-        this._wallID = Number(GAME_PARAMETERS.wallID);
-        this._topID = Number(GAME_PARAMETERS.topID);
 
         // Color List
         let COLORS = JSON.parse(JSON.parse(Shora.Lighting.PARAMETERS['helper']).colors);
@@ -1452,7 +1351,7 @@ class Layer {
         settings.name = name;
         this.LIGHTING[name] = settings;
 
-        console.log('Shora Lighting: ' + name + ' registered');
+        console.log(name + ' registered');
     }
 
     reset() {
@@ -1460,13 +1359,16 @@ class Layer {
     }
 
     updateIntensityFilter(spriteset, disable) {
+        if (!spriteset._baseSprite.filters) {
+            return;
+        }
         if (!disable && this._colorFilter.status == 'true') {
-            if (Shora.isMV)
+            if (Shora.EngineVersion == 'MV')
                 spriteset._baseSprite.filters[0].brightness(Number(this._colorFilter.brightness));
             else
                 spriteset._baseSprite.filters[0].setBrightness(Number(this._colorFilter.brightness) * 255);
         } else {
-            if (Shora.isMV)
+            if (Shora.EngineVersion == 'MV')
                 spriteset._baseSprite.filters[0].brightness(1);
             else
                 spriteset._baseSprite.filters[0].setBrightness(255);
@@ -1482,21 +1384,14 @@ class Layer {
         this.updateIntensityFilter(this._spriteset);
         if ($gameMap.mapId() === this.mapId && this._spriteset.type() == this._spritesetType && this.lighting) {
             this.lighting.update(); 
-            if ($gameMap.lightingState) {
-                this._spriteset._baseSprite.addChild(this.lighting.sprite);
-            } else {
-                this.updateIntensityFilter(spriteset, true);
-            }
+            this.lighting.updateDisplay();
+            this._spriteset._baseSprite.addChild(this.lighting.sprite); 
             return;
         }
         this._spritesetType = this._spriteset.type();
         this.mapId = $gameMap.mapId();
-        this.lighting.initialize(this._spritesetType);
-        if ($gameMap.lightingState) {
-            this._spriteset._baseSprite.addChild(this.lighting.sprite);
-        } else {
-            this.updateIntensityFilter(spriteset, true);
-        }
+        this.lighting.initialize();
+        this._spriteset._baseSprite.addChild(this.lighting.sprite);
     }
 
     removeScene(spriteset) {
@@ -1526,27 +1421,31 @@ class LightingLayer {
         
         this._displayX = this._displayY = -1;
 
+        // this._staticLighting = PIXI.RenderTexture.create(Graphics.width, Graphics.height); 
+        // this.staticLighting = new PIXI.Sprite(this._staticLighting);
+        //this.staticLighting.blendMode = PIXI.BLEND_MODES.ADD;
+
         this.createAmbientLayer();
+        //this.layer.addChild(this.staticLighting);
     }
 
-    initialize(spritesetType) {
+    initialize() {
         // soft shadow
         this.softShadowFilters[0]._blur = $gameLighting.softShadowStr;
         this.softShadowFilters[0].quality = $gameLighting.softShadowQlt;
         this.layer.filters = $gameLighting.softShadow ? this.softShadowFilters : null;
+        // clear static lighting layer
+        // this._clearStaticLayer = true;
+        // this._staticLighting.resize($gameLighting.width(), $gameLighting.height());
         // clear dynamic lighting layer
         for (const light of this.lights) if (light) 
             this.removeLight(light.id);
         this.lights = [];
         // shadow
+        $gameShadow.refresh();
 
-        if (spritesetType === 'map') {
-            $gameShadow.refresh();
-            this.addLightingSprite();
-        } else if (spritesetType === 'battle') {
-            $gameShadow.clear();
-            this.addBattleLightingSprite();
-        }
+        this.addLightingSprite();
+
         this.update();
     }
 
@@ -1573,17 +1472,8 @@ class LightingLayer {
     addLightingSprite() {
         for (const light of $gameMap._lighting) if (light)
             this.addLight(light);
-    }
-
-    addBattleLightingSprite() {
-        for (let i = 0; i < $shoraLayer._spriteset._actorSprites.length; ++i) {
-            let ac = $shoraLayer._spriteset._actorSprites[i];
-            console.log(ac);
-        }
-        for (let i = 0; i < $shoraLayer._spriteset._enemySprites.length; ++i) {
-            let en = $shoraLayer._spriteset._enemySprites[i];
-            console.log(en);
-        }
+        // for (const light of $gameMap._staticLighting)
+        //     this.addStaticLight(light);
     }
 
     /**
@@ -1601,7 +1491,7 @@ class LightingLayer {
         const light = new LightingSprite(options);
         light.renderable = true;
         //light.texture.baseTexture.premultipliedAlpha = false;
-        if (Shora.isMV)
+        if (Shora.EngineVersion == 'MV')
             light.blendMode = PIXI.BLEND_MODES.NORMAL; // TODO
         //light.x += $gameMap.displayX() * $gameMap.tileWidth();
         //light.y += $gameMap.displayY() * $gameMap.tileHeight();
@@ -1612,14 +1502,14 @@ class LightingLayer {
     }
 
     /**
-     * Remove a light sprite to layer.
+     * Remove a light sprite of layer.
      * @param {Number} id 
      */
     removeLight(id) {
         if (!this.lights[id]) 
             return Shora.warn('cant remove light' + id); 
         const light = this.lights[id];
-        this.lights[id] = null;
+        this.lights[id] = $gameMap._lighting[light.id] = null;
         this.layer.removeChild(light);
         light.destroy();
 	}
@@ -1640,6 +1530,8 @@ class LightingLayer {
         for (const child of this.layer.children) {
             if (child.updateDisplay) child.updateDisplay();
         }
+        // this.staticLighting.x = -$gameMap.displayX() * $gameMap.tileWidth(); 
+        // this.staticLighting.y = -$gameMap.displayY() * $gameMap.tileHeight();
     }
 
     // command
@@ -1647,9 +1539,7 @@ class LightingLayer {
         this._ambient.set(color, time);
     }
 
-}
-
-class AmbientLayer extends PIXI.Graphics {
+}class AmbientLayer extends PIXI.Graphics {
     constructor() {
         super();
         this.id = -1;
@@ -1677,9 +1567,6 @@ class AmbientLayer extends PIXI.Graphics {
 
 }
 
-
-/* The lighting itself, with its shadow and shadow's compute algorithm. */
-
 class LightingSprite extends PIXI.Sprite {
 
     get character() {
@@ -1687,28 +1574,24 @@ class LightingSprite extends PIXI.Sprite {
     }
 
     constructor(options) {
+        let baseSprite = TextureManager.filter(options);
         super();
 
-        let baseSprite = TextureManager.filter(options);
         this._baseSprite = baseSprite;
         this._baseSprite.anchor.set(0.5);
 
-        this.renderable = true;
+        this.renderable = false;
         this.id = options.id;
         this.fileName = options.filename;
         this.colorFilter = options.colorfilter;
-        this.status = options.status;
-        this.anchor.set(0.5);
 
-        this.radius = new ScaleAnimation(this, options); // default radius = 100%
-        this.setRadius(options.radius);
-        this.pulse = new PulseAnimation(this, options.animation.pulse, options.radius);
-        
+        this.radius = new ScaleAnimation(this, options);
         this.rotate = new AngleAnimation(this, options);
-        this.setAngle(options.direction ? this.rotate.angle() : options.angle);
+        this.status = options.status;
 
         this.offset = new OffsetAnimation(options.offset);
         this.setPostion(options);
+        this.anchor.set(0.5);
 
         this.flicker = new FlickerAnimation(this, options.animation.flicker);
         this.color = new TintAnimation(this, options);
@@ -1724,17 +1607,14 @@ class LightingSprite extends PIXI.Sprite {
         this.shadowOffsetX = options.shadowoffsetx || 0;
         this.shadowOffsetY = options.shadowoffsety || 0; 
         if (!this.bwall) // 54.00001; tw * h + 6 + eps
-            this.shadowOffsetY += $gameShadow.getWallHeight(this.sourceX(), this.sourceY());
-        this.shadow = new Shadow(this, options.shadowambient);
+            this.shadowOffsetY += $gameShadow.getWallHeight(this.worldX(), this.worldY());
+        this.shadow = new Shadow(this.worldX(), this.worldY(), this.worldBound(), options.shadowambient, this.shadowOffsetX, this.shadowOffsetY);
         if (this._shadow) 
-            this.shadow.render(this);
-        this.forceRecalculateShadow = false;
+            this.shadow.render(this.texture);
 
+        this.updateDisplay();
         this._justMoving = 2;
-
     }
-
-
     destroy() {
         this._baseSprite.destroy(); // don't destroy texture
         this._baseSprite = null;
@@ -1745,32 +1625,28 @@ class LightingSprite extends PIXI.Sprite {
         this.color.destroy();
         this.rotate.destroy();
         this.shadow.destroy();
-        this.pulse.destroy();
         this.radius = null;
         this.flicker = null;
         this.color = null;
         this.offset = null;
         this.rotate = null;
         this.shadow = null;
-        this.pulse = null;
 
         super.destroy(true);
     }
 
     update() {
+        if (!this.character)
+            return $shoraLayer.lighting.removeLight(this.id);
         if (!this.status) 
             return this.renderable = false;
-        // this.updateAnimation();
+        this.updateAnimation();
         this.updatePostion();
         this.updateTexture();
     }
 
     needRecalculateShadow() {
-        return 1;
-        if (this.forceRecalculateShadow) {
-            return true;
-        }
-        if (this.offset._changed) 
+        if (this.offset.updating()) 
             return true;
         if (this.character.isStopping()) {
             if (this._justMoving < 2) 
@@ -1781,18 +1657,20 @@ class LightingSprite extends PIXI.Sprite {
     }
 
     needRerender() {
-        return this.needRecalculateShadow() || this.radius._changed || this.rotate._changed;
+        return this.needRecalculateShadow() || this.radius.updating() || this.rotate.updating();
     }
 
     updateTexture() {
         if (!this.renderable || !this.needRerender()) return;
+        this.__render();
+    }
+
+    __render() {
         Graphics.app.renderer.render(this._baseSprite, this.texture);
         if (this._shadow) {
-            if (this.needRecalculateShadow()) {
-                // this.forceRecalculateShadow = false;
-                this.shadow.calculate(this);
-            }
-            this.shadow.render(this);
+            if (this.needRecalculateShadow()) 
+                this.shadow.update(this.worldX(), this.worldY(), this.worldBound(), this.shadowOffsetX, this.shadowOffsetY);
+            this.shadow.render(this.texture);
         }
     }
 
@@ -1806,25 +1684,29 @@ class LightingSprite extends PIXI.Sprite {
         if (!this.renderable) return;
         this.flicker.update();
         this.color.update();
-        this.pulse.update();
         this.radius.update();
         this.rotate.update();
     }
 
     updateDisplay() {
-        let bounds = this.getBounds();
-        this.renderable = $gameLighting.inDisplay(bounds.left, bounds.top, bounds.right, bounds.bottom);
+        // TODO: Better culling
+        let [x, y] = [this.x, this.y];
+        let minX = x - (this._baseSprite.width / 2),
+            minY = y - (this._baseSprite.height / 2),
+            maxX = x + (this._baseSprite.width / 2),
+            maxY = y + (this._baseSprite.height / 2);
+        this.renderable = $gameLighting.inDisplay(minX, minY, maxX, maxY);
     }
 
-    sourceX() {
+    worldX() {
         return this.x + $gameMap.displayX() * $gameMap.tileWidth() + this.shadowOffsetX;
     }
 
-    sourceY() {
+    worldY() {
         return this.y + $gameMap.displayY() * $gameMap.tileHeight() + this.shadowOffsetY;
     }
 
-    sourceBound() {
+    worldBound() {
         let bounds = this.getBounds();
         bounds.x += $gameMap.displayX() * $gameMap.tileWidth() + this.shadowOffsetX;
         bounds.y += $gameMap.displayY() * $gameMap.tileHeight() + this.shadowOffsetY;
@@ -1839,71 +1721,49 @@ class LightingSprite extends PIXI.Sprite {
     }
 
     setRadius(radius, time, type) {
-        this.radius.set(radius, time || 1, type || 1);
+        this.radius.set(radius, time || 1, type);
     }
 
     setAngle(angle, time, type) {
         // update .rotation instead of .angle for pixiv4 support
-        this.rotate.set(angle, time || 1, type || 1);
+        this.rotate.set(angle, time || 1, type);
     }
 
-    setColor(color, time) {
-        this.color.set(color, time || 1);
+    setTint(color, time, type) {
+        this.color.set(color, time || 1, type);
     }
 
     setOffsetX(x, time, type) {
-        this.offset.setX(x, time || 1, type || 1);
+        this.offset.setX(x, time || 1, type);
     }
 
     setOffsetY(y, time, type) {
-        this.offset.setY(y, time || 1, type || 1);
+        this.offset.setY(y, time || 1, type);
     }
 
     setOffset(x, y, time, type) {
-        this.offset.setX(x, time || 1, type || 1);
-        this.offset.setY(y, time || 1, type || 1);
+        this.offset.setX(x, time || 1, type);
+        this.offset.setY(y, time || 1, type);
     }
     setShadow(shadow) {
         $gameMap._lighting[this.id].shadow = this._shadow = shadow;
-        this.updateTexture();
+        this.__render();
     }
-
-    setTint(color, time, type) {	
-        this.color.set(color, time || 1, type || 1);	
-    }	
 }
 
-class BattleLightingSprite extends PIXI.Sprite {
-
-    get character() {
-        
-    }
-
-    constructor(options) {
-        super();
-
-
-    }
-
-}
-
-
-/// TODO: Directly draw darken geometry into light texture
+// TODO: Directly draw darken geometry into light texture
 // using vertex shader to calculate those geometry.
 // Currently it draw those into temporary sprite then into light texture
 class Shadow {
-    constructor(lighting, shadowAmbient) {
+    constructor(ox, oy, bounds, shadowAmbient, offsetx, offsety) {
         this.graphics = new PIXI.Graphics();
         // todo: remove those
-        let bounds = lighting.sourceBound();
-        this.texture = PIXI.RenderTexture.create(lighting.width, lighting.height);
+        this.texture = PIXI.RenderTexture.create(bounds.width, bounds.height);
         this.sprite = new PIXI.Sprite(this.texture);
         this.sprite.blendMode = PIXI.BLEND_MODES.MULTIPLY;
 
-        this.ox = this.oy = 0;
         this.shadowAmbient = shadowAmbient;
-        this.calculate(lighting);
-        this.render(lighting);
+        this.update(ox, oy, bounds, offsetx, offsety);
     }
 
     destroy() {
@@ -1917,73 +1777,67 @@ class Shadow {
         this.sprite = null;
     }
 
-    calculate(lighting) {
-        this.ox = lighting.sourceX(), this.oy = lighting.sourceY(), this.bounds = lighting.sourceBound();
-        this.polygon = ShadowSystem.computeViewport(
-                        [this.ox, this.oy], 
-                        $gameShadow.segments, 
-                        [this.bounds.left, this.bounds.top], 
-                        [this.bounds.right, this.bounds.bottom]);
-        this.draw(); 
-    }
-
-    render(lighting) {
-        let ox = lighting.sourceX() - lighting.shadowOffsetX, 
-            oy = lighting.sourceY() - lighting.shadowOffsetY, 
-            rotation = lighting.rotation;
-
-        // render the shadow mask
-        this.graphics.pivot.set(ox, oy);
-        this.graphics.position.set(this.texture.width / 2, this.texture.height / 2);
-        this.graphics.scale.set(1 / lighting.scale.x);
-        this.graphics.rotation = 2 * Math.PI - rotation;
-        Graphics.app.renderer.render(this.graphics, this.texture);
-
-        //  render the upper shadow mask
-        $gameShadow.upper.pivot.set(ox, oy);
-        $gameShadow.upper.position.set(this.texture.width / 2, this.texture.height / 2);
-        $gameShadow.upper.scale.set(1 / lighting.scale.x);
-        $gameShadow.upper.rotation = 2 * Math.PI - rotation;
-        Graphics.app.renderer.render($gameShadow.upper, this.texture, false);
-
-        // render the ignore shadow mask (not do if not nessecary)
-        if ($gameShadow.haveIgnoreShadow) {
-            $gameShadow.ignore.pivot.set(ox, oy);
-            $gameShadow.ignore.position.set(this.texture.width / 2, this.texture.height / 2);
-            $gameShadow.ignore.scale.set(1 / lighting.scale.x);
-            $gameShadow.ignore.rotation = 2 * Math.PI - rotation;
-            Graphics.app.renderer.render($gameShadow.ignore, this.texture, false);
-        }
-
-        // render everything to the light texture
-        Graphics.app.renderer.render(this.sprite, lighting.texture, false);
-    }
-
-    drawWall(index) {
-		let [x, y] = this.polygon[index], last = (index == 0 ? this.polygon.length - 1 : index - 1);
-		let [nx, ny] = this.polygon[last]; 
-
-        if (y != ny || y > this.oy) return;
-
-		let tw = $gameMap.tileWidth();
-
-        // 2 possiblities: nx to x is 1 height, or multiple height
-        let h = $gameShadow.check(y, nx, x);
-        if (h === 0) return;
-        if (h !== -1) {
-            this.graphics.lineTo(nx, ny - tw * h)
-		 				 .lineTo(x, y - tw * h);
-        } else {
-            // TODO: walking through mutiple height
-
-        }
-        
-	}; 
-
-    draw() {
+    update(ox, oy, bounds, offsetx, offsety) {
+        this.bounds = bounds;
+        this.polygon = ShadowSystem.computeViewport([ox, oy], $gameShadow.segments, [this.bounds.left, this.bounds.top], [this.bounds.right, this.bounds.bottom]);
+        this._parallelSegments = {};
         this.graphics.clear();
 
-        // BOTTLE NECK
+        if (bounds.width != this.texture.width || bounds.height != this.texture.height)
+            this.texture.resize(bounds.width, bounds.height);
+
+        this.draw(oy, $gameShadow.lowerWalls);
+
+        // todo
+        this.graphics.x = $gameShadow.upperWalls.x = -this.bounds.x + offsetx;
+        this.graphics.y = $gameShadow.upperWalls.y = -this.bounds.y + offsety;
+        Graphics.app.renderer.render(this.graphics, this.texture);
+        Graphics.app.renderer.render($gameShadow.upperWalls, this.texture, false);
+    }
+
+    render(texture) {
+        // to do
+        Graphics.app.renderer.render(this.sprite, texture, false);
+    }
+
+    drawWall(index, oy, lowerWalls) {
+		let [x, y] = this.polygon[index], last = (index == 0 ? this.polygon.length - 1 : index - 1);
+		let [nx, ny] = this.polygon[last];
+
+		let tw = $gameMap.tileWidth();
+		if (y == ny) {
+			if (!this._parallelSegments[y]) this._parallelSegments[y] = [];
+			this._parallelSegments[y].push([nx, x]);
+		}
+		for (let i = 0; i < lowerWalls.length; ++i) {
+			let [x2, y2, x1, y1, height] = lowerWalls[i];
+			if (y == ny && y == y1 && x >= x1 && x <= x2 && nx >= x1 && nx <= x2 && oy >= y1) {
+				this.graphics.lineTo(nx, ny - tw * height)
+							    .lineTo(x, y - tw * height);
+			}
+		}
+	};
+
+    containParallelSegment(y, u, v) {
+		if (!this._parallelSegments[y]) return false;
+		let lo = 0, hi = this._parallelSegments[y].length - 1, result = -1;
+		while (lo <= hi) {
+			let mid = (lo + hi) >> 1;
+			if (this._parallelSegments[y][mid][0] >= u) {
+				result = mid;
+				hi = mid - 1;
+			} else lo = mid + 1;
+		}
+		if (result == -1) return false;
+		let [x1, x2] = this._parallelSegments[y][result];
+		if (v >= x1) return true;
+		if (result === 0) return false; 
+        [x1, x2] = this._parallelSegments[y][result - 1];
+		//if (v >= x1) return true;
+        return false;
+	}
+
+    draw(oy, lowerWalls) {
         this.graphics.beginFill(this.shadowAmbient);
 		this.graphics.drawRect(this.bounds.x, this.bounds.y, this.bounds.width, this.bounds.height);
 		this.graphics.endFill();
@@ -1991,31 +1845,64 @@ class Shadow {
 		this.graphics.beginFill(0xffffff);
 		this.graphics.moveTo(this.polygon[0][0], this.polygon[0][1]);
 		for (let i = 1; i < this.polygon.length; ++i) {
-			this.drawWall(i);
+			this.drawWall(i, oy, lowerWalls);
             this.graphics.lineTo(this.polygon[i][0], this.polygon[i][1]);
         }
         this.graphics.lineTo(this.polygon[0][0], this.polygon[0][1]);
-		this.drawWall(0);
-		this.graphics.endFill(); 
+        this.graphics.endFill(); 
+		this.drawWall(0, oy, lowerWalls);
+		if (this.polygon[0][1] == this.polygon[this.polygon.length - 1][1]) {
+			if (!this._parallelSegments[this.polygon[0][1]]) this._parallelSegments[this.polygon[0][1]] = [];
+			this._parallelSegments[this.polygon[0][1]].push([this.polygon[0][0], this.polygon[this.polygon.length - 1][0]]);
+		}
+
+		for (let y in this._parallelSegments) {
+			for (let i in this._parallelSegments[y]) {
+				if (this._parallelSegments[y][i][0] > this._parallelSegments[y][i][1])
+				[this._parallelSegments[y][i][0], this._parallelSegments[y][i][1]] = [this._parallelSegments[y][i][1], this._parallelSegments[y][i][0]];
+			}
+			this._parallelSegments[y].sort((a, b) => a[0] - b[0]);
+		}
 
 		//drawing lower-walls
         this.graphics.beginFill(this.shadowAmbient); 
-        let tw = $gameMap.tileWidth(), leftBound = this.bounds.left, rightBound = this.bounds.right, downBound = this.bounds.bottom, topBound = this.bounds.top;
-		for (let i = 0; i < $gameShadow.lowerWalls.length; ++i) {
-			let [x2, y2, x1, y1, height] = $gameShadow.lowerWalls[i];
-            if (y1 >= this.oy && y1-tw*height <= downBound && x1 <= rightBound && x2 >= leftBound) {
+        let tw = $gameMap.tileWidth();
+		for (let i = 0; i < lowerWalls.length; ++i) {
+			let [x2, y2, x1, y1, height] = lowerWalls[i];
+            if (y1 >= oy || !this.containParallelSegment(y1, x1, x2)) {
                 this.graphics.moveTo(x1, y1);
                 this.graphics.lineTo(x1, y1-tw*height);
                 this.graphics.lineTo(x2, y2-tw*height);
                 this.graphics.lineTo(x2, y2);
             }
 		}
-        this.graphics.endFill();   
-
+        this.graphics.endFill();
+        
+        // ignore shadows 
+        this.graphics.beginFill(0xffffff); 
+        for (let i = 0; i < $gameShadow.ignoreShadows.length; ++i) {
+            let [x, y] = $gameShadow.ignoreShadows[i];
+            this.graphics.moveTo(x, y);
+            this.graphics.lineTo(x, y+tw);
+            this.graphics.lineTo(x+tw, y+tw);
+            this.graphics.lineTo(x+tw, y);
+        }
+        this.graphics.endFill();
+        
+        /* drawing top-walls
+        this.graphics.beginFill(0x333333);
+        for (let i = Math.max(0, Math.floor(this.bounds.top / 48));
+            i <= Math.min($gameShadow.topWalls.length - 1, Math.ceil(this.bounds.bottom / 48)); ++i) {
+            let j = $gameShadow.topWalls[i].pair_floor_search(this.bounds.left, 1) + 1;
+            for (; j < $gameShadow.topWalls[i].length && $gameShadow.topWalls[i][j][0] < this.bounds.right; ++j) {
+                let [begin, end] = $gameShadow.topWalls[i][j];
+                this.graphics.drawRect(begin, i*48, end-begin, 48);
+            }
+        }
+        this.graphics.endFill();
+        */
     }
-}
-
-var ShadowSystem = (function() {
+}var ShadowSystem = (function() {
 
     const epsilon = () => 0.0000001;
 
@@ -2037,7 +1924,9 @@ var ShadowSystem = (function() {
     };
 
     const angle2 = (a, b, c) => {
-        let a3 = angle(a,b) - angle(b,c);
+        let a1 = angle(a,b);
+        let a2 = angle(b,c);
+        let a3 = a1 - a2;
         if (a3 < 0) a3 += 360;
         if (a3 > 360) a3 -= 360;
         return a3;
@@ -2046,8 +1935,10 @@ var ShadowSystem = (function() {
     const sortPoints = (position, segments) => {
         let points = new Array(segments.length * 2);
         for (let i = 0; i < segments.length; ++i) {
-            points[2*i] = [i, 0, angle(segments[i][0], position)];
-            points[2*i+1] = [i, 1, angle(segments[i][1], position)];
+            for (let j = 0; j < 2; ++j) {
+                let a = angle(segments[i][j], position);
+                points[2*i+j] = [i, j, a];
+            }
         }
         points.sort(function(a,b) {return a[2]-b[2];});
         return points;
@@ -2247,15 +2138,15 @@ var ShadowSystem = (function() {
                 if (i == sorted.length) break;
             } while (sorted[i][2] < sorted[orig][2] + epsilon());
 
-            if (extend) {	
-                polygon.push(vertex);	
-                let cur = intersectLines(bounded[heap[0]][0], bounded[heap[0]][1], position, vertex);	
-                if (!equal(cur, vertex)) polygon.push(cur);	
-            } else if (shorten) {	
-                polygon.push(intersectLines(bounded[old_segment][0], bounded[old_segment][1], position, vertex));	
-                polygon.push(intersectLines(bounded[heap[0]][0], bounded[heap[0]][1], position, vertex));	
-            } 	
-        }	
+            if (extend) {
+                polygon.push(vertex);
+                let cur = intersectLines(bounded[heap[0]][0], bounded[heap[0]][1], position, vertex);
+                if (!equal(cur, vertex)) polygon.push(cur);
+            } else if (shorten) {
+                polygon.push(intersectLines(bounded[old_segment][0], bounded[old_segment][1], position, vertex));
+                polygon.push(intersectLines(bounded[heap[0]][0], bounded[heap[0]][1], position, vertex));
+            } 
+        }
         return polygon;
     };
 
@@ -2268,7 +2159,7 @@ var ShadowSystem = (function() {
             if (segments[i][0][0] > viewportMaxCorner[0] && segments[i][1][0] > viewportMaxCorner[0]) continue;
             if (segments[i][0][1] > viewportMaxCorner[1] && segments[i][1][1] > viewportMaxCorner[1]) continue;
             let intersections = [];
-            for (let j = 0; j < viewport.length; ++j) { // ?
+            for (let j = 0; j < viewport.length; ++j) {
                 let k = j + 1;
                 if (k == viewport.length) k = 0;
                 if (doLineSegmentsIntersect(segments[i][0][0], segments[i][0][1], segments[i][1][0], segments[i][1][1], viewport[j][0], viewport[j][1], viewport[k][0], viewport[k][1])) {
@@ -2373,14 +2264,10 @@ var ShadowSystem = (function() {
 
 })();
 
-
-/* All the animation classes, for use with lighting and ambient color changing. */
-
 Shora.Animation = class {
     constructor(sprite, ref) {
         this._sprite = sprite;
         this._ref = ref;
-        this._changed = false;
     }
     static get transition() {
         return [
@@ -2401,7 +2288,6 @@ Shora.Animation = class {
 class FlickerAnimation extends Shora.Animation {
     constructor(sprite, ref) {
         super(sprite, ref);
-        if (!ref.status) return;
 
         this.oalpha = 1;
 	    this.flickIntensity = ref.flickintensity || 1;
@@ -2425,33 +2311,73 @@ class FlickerAnimation extends Shora.Animation {
     }
 }
 
+// class PulseAnimation extends Shora.Animation {
+//     constructor(sprite, ref) {
+//         super(sprite._baseSprite, ref);
+//         this.pulsating = true;
+//         this.range = 1;
+//         this.factor = ref.pulsefactor / 50 || 0;
+//         this.max = this.range + this.factor;
+// 		this.min = this.range - this.factor;
+//         this.speed = ref.pulsespeed / 500 || 0;
+        
+//         this.tick = this.space = 0;
+//     }
+
+//     set(range, time) {
+//         this.tick = time;
+//         this.space = (range - this.range) / time;
+//     }
+
+//     updating() {
+//         return this._ref.status && this.factor !== 0;
+//     }
+
+//     update() {
+//     	if (!this._ref.status) return;
+//         let spd = Math.random() / 500 + this.speed;
+//         if (this.pulsating) {
+// 	        if (this._sprite.scale.x < this.max) {
+// 	            this._sprite.scale.x += spd;
+// 	            this._sprite.scale.y += spd;
+// 	        } else {
+// 	            this.pulsating = false;
+// 	        }
+// 	    } else {
+// 	        if (this._sprite.scale.x > this.min) {
+// 	            this._sprite.scale.x -= spd;
+// 	            this._sprite.scale.y -= spd;
+// 	        } else {
+// 	            this.pulsating = true;
+// 	        }
+// 	    }
+//     }
+// }
+
 class ScaleAnimation extends Shora.Animation {
     constructor(light, ref) {
-        super(light, ref);
-        this.s0 = this.s1 = this.maxRadius = 1;
-        this.delta = this.tick = 0; 
-        this.time = -1; 
+        super(light._baseSprite, ref);
+        this.s0 = this.s1 = ref.radius; 
+        this.delta = this.tick = 0; this.time = -1;
+        this.originalScale = ref.radius;
+        this._sprite.scale.set(ref.radius);
+
+    }
+
+    updating() {
+        return this.tick <= this.time;
     }
 
     update() {
-        this._changed = false;
-
         if (this.tick <= this.time) {
-            let oldRadius = this._ref.radius;
             this._ref.radius = this.s0 + Shora.Animation.transition[this.type](this.tick / this.time) * this.delta;
             this._sprite.scale.set(this._ref.radius);
             this.tick++;
-            this._changed = oldRadius !== this._ref.radius;
-        } 
-
-        if (!this._changed && this._sprite._shadow && this._ref.radius > this.maxRadius) {
-            this._sprite.forceRecalculateShadow = true;
-            this.maxRadius = this._ref.radius;
         }
     }
 
     set(scale, time, type) {
-        if (scale === this.s1) return;
+        scale *= this.originalScale;
         this.s0 = this._sprite.scale.x; this.s1 = scale;
         this.delta = this.s1 - this.s0;
         this.time = time; this.tick = 0;
@@ -2460,48 +2386,25 @@ class ScaleAnimation extends Shora.Animation {
     
 }
 
-class PulseAnimation extends Shora.Animation {
-    constructor(light, ref, radius) {
-        super(light, ref);
-        if (!ref.status) return;
-
-        const dif = radius * ref.pulsefactor / 100;
-        this.maxRadius = radius + dif;
-        this.minRadius = radius - dif;
-
-        this.tick = Math.floor(ref.pulsespeed * 30);
-        light.radius.set(this.maxRadius, this.tick, 2);
-        this.increasing = true;
-    }
-
-    update() {
-        if (!this._ref.status) return;
-        if (this.increasing && this._sprite.scale.x === this.maxRadius) {
-            this.increasing = false;
-            this._sprite.radius.set(this.minRadius, this.tick, 2);
-        } else if (!this.increasing && this._sprite.scale.x === this.minRadius) {
-            this.increasing = true;
-            this._sprite.radius.set(this.maxRadius, this.tick, 2);
-        }
-    }
-
-    
-    
-}
 
 class AngleAnimation extends Shora.Animation {
     constructor(light, ref) {
-        super(light, ref);
-        this.a0 = this.a1 = 0; 
+        super(light._baseSprite, ref);
+        this.a0 = this.a1 = ref.angle; 
         this.delta = this.tick = 0; this.time = -1;
 
         this._character = light.character;
         this.direction = this._character ? this._character.direction() : null;
+        this._sprite.rotation = ref.direction ? this.angle() : ref.angle;
     }
 
     destroy() {
         super.destroy();
         this._character = null;
+    }
+
+    updating() {
+        return this.tick <= this.time;
     }
 
     angle() {
@@ -2516,8 +2419,6 @@ class AngleAnimation extends Shora.Animation {
     }
 
     update() {
-        this._changed = false;
-
         if (this._ref.direction && this.direction != this._character.direction()) {
             this.direction = this._character.direction();
             this.set(this.angle(), 20, 2);
@@ -2528,8 +2429,7 @@ class AngleAnimation extends Shora.Animation {
             = this._sprite.rotation 
             = this.a0 + Shora.Animation.transition[this.type](this.tick / this.time) * this.delta;
             this.tick++;
-            this._changed = true;
-        } 
+        }
     }
 
     set(angle, time, type) {
@@ -2542,8 +2442,8 @@ class AngleAnimation extends Shora.Animation {
 }
 
 class TintAnimation extends Shora.Animation {
-    constructor(sprite, ref) {
-        super(sprite, ref);
+    constructor(light, ref) {
+        super(light, ref);
         this._sprite.tint = ref.tint || Math.round(Math.random() * 0xfffff);
 
         this.ocolor = Shora.ColorManager.hexToRGB(ref.tint);
@@ -2575,6 +2475,10 @@ class OffsetAnimation {
         this.type_x = this.type_y = 0;
     }
 
+    updating() {
+        return this.tick_x <= this.time_x || this.tick_y <= this.time_y;
+    }
+
     setX(x, time, type) {
         this.ox = this.offset.x;
         this.delta_x = x - this.ox;
@@ -2590,17 +2494,13 @@ class OffsetAnimation {
     }
 
     update() {
-        this._changed = false;
-
         if (this.tick_x <= this.time_x) {
             this.offset.x = this.ox + Shora.Animation.transition[this.type_x](this.tick_x / this.time_x) * this.delta_x;
             this.tick_x++;
-            this._changed = true;
         }
         if (this.tick_y <= this.time_y) {
             this.offset.y = this.oy + Shora.Animation.transition[this.type_y](this.tick_y / this.time_y) * this.delta_y;
             this.tick_y++;
-            this._changed = true;
         }
     }
 
@@ -2627,9 +2527,33 @@ Shora.ColorManager = {
     }
 }
 
+const TextureManager = {
+    /**
+     * Return a filtered texture.
+     * @param {PIXI.BaseTexture} baseTexture 
+     * @param {Object} colorFilter 
+     */
+    filter: function(options) {
+        if ($shoraLayer.textureCache[options.filename])
+            return new PIXI.Sprite($shoraLayer.textureCache[options.filename]);
+        let baseTexture = $shoraLayer.load(options.filename);
+        let sprite = new PIXI.Sprite(new PIXI.Texture(baseTexture));
+        let colorFilter = options.colorfilter;
+        let filter = new ColorFilter();
+		filter.setBrightness(colorFilter.brightness || 255);
+		filter.setHue(colorFilter.hue === -1 ? Math.random() * 360 : colorFilter.hue);
+		filter.setColorTone(colorFilter.colortone || [0, 0, 0, 0]); // 8, 243, 242, 194
+		filter.setBlendColor(colorFilter.blendcolor || [0, 0, 0, 0]); // 96, 151, 221, 229
+		sprite.filters = [filter];
+        let renderedTexture = Graphics.app.renderer.generateTexture(sprite, 1, 1, sprite.getBounds());
+        sprite.filters = null;
+		sprite.destroy({texture: true});
+        $shoraLayer.textureCache[options.filename] = renderedTexture;
+		return new PIXI.Sprite(renderedTexture);
+    }
+}
 
-
-/* Game classes for script interfacing. */
+// ES5 class for save/load.
 
 function GameLighting() {
     this.initialize(...arguments);
@@ -2666,11 +2590,7 @@ GameLighting.prototype.add = function(options) {
         Shora.warn('Cannot find light named [' + options.name + '].\nPlease register lighting before use.\nDefault Lighting used instead');
         options.name = 'default';
     }
-    //const params = JSON.parse(JSON.stringify({...$shoraLayer.LIGHTING[options.name], ...options}));
     const params = {...$shoraLayer.LIGHTING[options.name], ...options};
-    if (options.offsetx) params.offset.x = options.offsetx;
-    if (options.offsety) params.offset.y = options.offsety;
-
     this.remove(params.id);
     $gameMap._lighting[params.id] = params;
     $shoraLayer.lighting.addLight(params);
@@ -2681,10 +2601,8 @@ GameLighting.prototype.add = function(options) {
  * @param {Number} id 
  */
  GameLighting.prototype.remove = function(id) {
-    if ($gameMap._lighting[id]) {
+    if ($gameMap._lighting[id])
         $shoraLayer.lighting.removeLight(id);
-        $gameMap._lighting[id] = null;
-    }
 }
 
 GameLighting.prototype.inDisplay = function(minX, minY, maxX, maxY) {
@@ -2704,11 +2622,11 @@ GameLighting.prototype.setMapAmbient = function(color, time) {
     $shoraLayer.lighting.setMapAmbient(color.toHexValue(), Number(time) || 1);
 }
 
-GameLighting.prototype.setShadowAmbient = function(color) {
+GameLighting.prototype.setShadowAmbient = function(color, time) {
     this.shadowAmbient = color.toHexValue();
 }
 
-GameLighting.prototype.setTopBlockAmbient = function(color) {
+GameLighting.prototype.setTopBlockAmbient = function(color, time) {
     this.topBlockAmbient = color.toHexValue();
 }
 
@@ -2797,16 +2715,6 @@ GameLighting.prototype.setPluginState = function(status) {
         this.disable();
 }
 
-GameLighting.prototype.temporarySetPluginState = function(status) {
-    if (status) {
-        if (SceneManager._scene._spriteset)
-            $shoraLayer.loadScene(SceneManager._scene._spriteset);
-    } else {
-        if (SceneManager._scene._spriteset)
-            $shoraLayer.removeScene(SceneManager._scene._spriteset);
-    }
-}
-
 GameLighting.prototype.enable = function() {
     if (!this._disabled) return;
     this._disabled = false;
@@ -2834,197 +2742,131 @@ class ShadowCaster {
 class GameShadow {
     constructor() {
         this.segments = [];
+        this.originalSegments = [];
+        this.horizontalSegments = [];
+        this.verticalSegments = [];
         this.lowerWalls = [];
+        this.originalLowerWalls = [];
+        this.ignoreShadows = [];
+        this.topWalls = []; // for fallback to draw each top wall
+        this.customCasters = [];
 
-        // this.customCasters = []; TODO
-
-        this._upperGraphics = new PIXI.Graphics();
-        this._upperTexture = PIXI.RenderTexture.create();
-        this.upper = new PIXI.Sprite(this._upperTexture);
-
-        this.haveIgnoreShadow = false;
-        this._ignoreGraphics = new PIXI.Graphics();
-        this._ignoreTexture = PIXI.RenderTexture.create();
-        this.ignore = new PIXI.Sprite(this._ignoreTexture);
-
-        // this._upperGraphics.blendMode = PIXI.BLEND_MODES.MULTIPLY;
+        this._upperWalls = new PIXI.Graphics();
+        this._upperWallsTexture = PIXI.RenderTexture.create();
+        this.upperWalls = new PIXI.Sprite(this._upperWallsTexture);
+        // this._upperWalls.blendMode = PIXI.BLEND_MODES.MULTIPLY;
     }
 
     refresh() {
-        this.clear();
+        this.segments = [];
+        this.originalSegments = [];
+        this.horizontalSegments = [];
+        this.verticalSegments = [];
+        this.lowerWalls = [];
+        this.originalLowerWalls = [];
+        this._upperWalls.clear();
+        this._upperWallsTexture.resize($gameLighting.width(), $gameLighting.height());
         this.scanMapCaster();
 		this.createSegments();
     }
-
-    clear() {
-        this.segments = [];
-        this.lowerWalls = [];
-
-        this._upperGraphics.clear();
-        this._upperTexture.resize($gameLighting.width(), $gameLighting.height());
-
-        this._ignoreGraphics.clear();
-        this._ignoreTexture.resize($gameLighting.width(), $gameLighting.height());
-    }
-
-
+    
     scanMapCaster() {
-        const width = $gameMap.width(),
-              height = $gameMap.height(),
-              tw = $gameMap.tileWidth(),
-              th = $gameMap.tileHeight(),
-              regionStart = $shoraLayer._regionStart,
-              regionEnd = $shoraLayer._regionEnd,
-              topRegionId = $shoraLayer._topRegionId,
-              ignoreShadowsId = $shoraLayer._ignoreShadowsId,
-              wallID = $shoraLayer._wallID,
-              topID = $shoraLayer._topID;
-
-
-        this.map = new Array(height)
+        this.map = new Array($gameMap.height())
             .fill(0)
-            .map(() => new Array(width).fill(0));
-        this.lower = new Array(height)
-            .fill(0)
-            .map(() => new Array(width).fill(0));
+            .map(() => new Array($gameMap.width()).fill(0));
 
-        let id, h;
-
-        for (let x = 0; x < width; ++x) {
-            h = 0;
-            for (let y = height - 1; y >= 0; --y) {
-                id = $gameMap.terrainTag(x, y);
-                if (id == wallID) {
-                    if (y !== height - 1 && $gameMap.terrainTag(x, y + 1) !== wallID) h = 0;
-                    h += 1;
-                } else if (id == topID) {
-                    this.map[y][x] = h + 1;
-                } else {
-                    h = 0;
-                }
-            }
-        }
-
-        // drawing 
-        this._upperGraphics.beginFill($gameLighting.topBlockAmbient);
-        this._ignoreGraphics.beginFill(0xffffff);
-
-        for (var i = 0; i < height; ++i) {
-            for (var j = 0; j < width; ++j) {
-                id = $gameMap.regionId(j, i);
-                if (regionStart <= id && id <= regionEnd) {
-                    if (!this.map[i][j]) {
-                        this.map[i][j] = id - regionStart + 1; 
-                    }
-                }
-                if (id === topRegionId) {
-                    this._upperGraphics.drawRect(j * tw, i * th, tw, th);
-                }
-                if (id === ignoreShadowsId) {
-                    this.haveIgnoreShadow = true;
-                    this._ignoreGraphics.drawRect(j * tw, i * th, tw, th);
-                }
-            }
-        }
-
-        for (var i = 0; i < height; ++i) {
-            for (var j = 0; j < width; ++j) {
-                h = this.map[i][j];
-                if (!h) continue;
-                this._upperGraphics.drawRect(j * tw, i * th, tw, th);
-                if (i + h - 1 < height) this.lower[i + h - 1][j] = h - 1; 
-            }
-        }
-
-        this._upperGraphics.endFill();
-        this._ignoreGraphics.endFill();
-        Graphics.app.renderer.render(this._upperGraphics, this._upperTexture);
-        Graphics.app.renderer.render(this._ignoreGraphics, this._ignoreTexture);
-
-    }
-
-    check(y, x1, x2) {
-        if (y === 0) return 0;
-        if (x1 > x2) [x1, x2] = [x2, x1];
-
-        let tw = $gameMap.tileWidth(),
-            th = $gameMap.tileHeight();
-
-        // todo: check for custom shadow cast
-        if (y % th !== 0) {
-            // custom
-            return 0;
-        }
-
-        // todo: check for differ continous height
-        // wait how did it not bug this part
+        let [tw, th] = [$gameMap.tileWidth(), $gameMap.tileHeight()];
+        let regionStart = $shoraLayer._regionStart;
+        let regionEnd = $shoraLayer._regionEnd;
+        let topRegionId = $shoraLayer._topRegionId;
+        let ignoreShadowsId = $shoraLayer._ignoreShadowsId;
         
-        // how?
-        y = y / th - 1;
-        let x3 = Math.min(0, Math.max(this.lower[y].length, Math.floor(x1 / tw))),
-            x4 = Math.min(0, Math.max(this.lower[y].length, Math.ceil(x2 / tw)));
-
-        return Math.min(this.lower[y][x3], this.lower[y][x4]);
+        this._upperWalls.beginFill($gameLighting.topBlockAmbient);
+        let flag = false, begin = 0, width = 0;
+        for (var i = 0; i < $gameMap.height(); ++i) {
+            this.topWalls.push([]);
+            for (var j = 0; j < $gameMap.width(); ++j) {
+                if (regionStart <= $gameMap.regionId(j, i) && $gameMap.regionId(j, i) <= regionEnd) {
+                    this.map[i][j] = $gameMap.regionId(j, i) - regionStart + 1; 
+                }
+                if ((regionStart <= $gameMap.regionId(j, i) && $gameMap.regionId(j, i) <= regionEnd) || $gameMap.regionId(j, i) == topRegionId) {
+                    this._upperWalls.drawRect(j * tw, i * th, tw, th);
+                    /*
+                    if (!flag) {
+                        flag = true;
+                        begin = j * 48;
+                    }
+                    width += 48;
+                } else if (flag) {
+                    flag = false;
+                    this.topWalls[i].push([begin, begin+width]);
+                    width = 0;
+                    */
+                }
+                if ($gameMap.regionId(j, i) == ignoreShadowsId) 
+                    this.ignoreShadows.push([j * tw, i * tw]);
+            }
+        }
+        this._upperWalls.endFill();
+        Graphics.app.renderer.render(this._upperWalls, this._upperWallsTexture);
     }
-
 
     outOfBound(x, y) {
 		return x < 0 || y < 0 || y >= this.map.length || x >= this.map[y].length;
     }
     
-    addUpperSegment(x, y, h, vert, horz) {
+    addUpperSegment(x, y, height) {
 		let [tw, th] = [$gameMap.tileWidth(), $gameMap.tileHeight()];
-		horz.push([x * tw, (y + h) * th, (x + 1) * tw, (y + h) * th]);
+		this.horizontalSegments.push([x * tw, (y + height) * th, (x + 1) * tw, (y + height) * th]);
     }
     
-    addLowerSegment(x, y, h, vert, horz) {
+    addLowerSegment(x, y, height) {
 		let [tw, th] = [$gameMap.tileWidth(), $gameMap.tileHeight()];
-		horz.push([(x + 1) * tw, (y + h + 1) * th, x * tw, (y + h + 1) * th]);
-        // lower walls
-		this.lowerWalls.push([(x + 1) * tw, (y + h + 1) * th, x * tw, (y + h + 1) * th, h]);
+		this.horizontalSegments.push([(x + 1) * tw, (y + height + 1) * th, x * tw, (y + height + 1) * th]);
+		this.lowerWalls.push([(x + 1) * tw, (y + height + 1) * th, x * tw, (y + height + 1) * th, height]);
     }
     
-    addRightSegment(x, y, h, vert, horz) {
+    addRightSegment(x, y, height) {
 		let [tw, th] = [$gameMap.tileWidth(), $gameMap.tileHeight()];
-		vert.push([(x + 1) * tw, (y + h) * th, (x + 1) * tw, (y + h + 1) * th]);
+		this.verticalSegments.push([(x + 1) * tw, (y + height) * th, (x + 1) * tw, (y + height + 1) * th]);
     }
     
-    addLeftSegment(x, y, h, vert, horz) {
+    addLeftSegment(x, y, height) {
 		let [tw, th] = [$gameMap.tileWidth(), $gameMap.tileHeight()];
-		vert.push([x * tw, (y + h) * th, x * tw, (y + h + 1) * th]);
+		this.verticalSegments.push([x * tw, (y + height) * th, x * tw, (y + height + 1) * th]);
     }
     
-    addCaster(x, y, h, vert, horz) {
+    addCaster(x, y, height) {
 		// Check left of this postion.
 		if (!this.outOfBound(x, y - 1) && this.map[y - 1][x]) {
 			// Check upper of this postion.
 			if (!this.outOfBound(x - 1, y)) {
-				if (this.map[y][x - 1] !== h + 1) {
-					this.addLeftSegment(x, y, h, vert, horz);
+				if (!this.map[y][x - 1]) {
+					this.addLeftSegment(x, y, height);
 				} 
 			}
 		} else {
 			// Check upper of this postion.
 			if (!this.outOfBound(x - 1, y)) {
-				this.addUpperSegment(x, y, h, vert, horz);
+				this.addUpperSegment(x, y, height);
 				// Check left of this postion.
-				if (this.map[y][x - 1] !== h + 1) {
-					this.addLeftSegment(x, y, h, vert, horz);
+				if (!this.map[y][x - 1]) {
+					this.addLeftSegment(x, y, height);
 				} 
 			} 
 		} 
 
 		// Check right of this postion.
 		if (!this.outOfBound(x + 1, y)) {
-			if (this.map[y][x + 1] !== h + 1) {
-				this.addRightSegment(x, y, h, vert, horz);
+			if (!this.map[y][x + 1]) {
+				this.addRightSegment(x, y, height);
 			}
 		}
 
 		// Check lower of this postion.
 		if (!this.outOfBound(x, y + 1)) {
-			if (this.map[y + 1][x] !== h + 1) {
-				this.addLowerSegment(x, y, h, vert, horz);
+			if (!this.map[y + 1][x]) {
+				this.addLowerSegment(x, y, height);
 			}
 		}
     }
@@ -3094,21 +2936,23 @@ class GameShadow {
     }
     
     createSegments() {
-
-        let vert = [], horz = [];
-
 		for (var y = 0; y < this.map.length; y++) {
 			for (var x = 0; x < this.map[y].length; x++) {
 				if (this.map[y][x]) {
-					this.addCaster(x, y, this.map[y][x] - 1, vert, horz);
+					this.addCaster(x, y, this.map[y][x] - 1);
 				}
 			}
 		}
 
-        this.segments = ShadowSystem.getSegments(
-                            this.mergeVerticalSegments(vert).concat(
-                            this.mergeHorizontalSegments(horz)
-                            ));
+		// Shadow Casters
+        this.verticalSegments = this.mergeVerticalSegments(this.verticalSegments);
+        this.horizontalSegments = this.mergeHorizontalSegments(this.horizontalSegments);
+
+        // this.segments = this.horizontalSegments.concat(this.verticalSegments);
+        // for (const caster of this.customCasters)
+        //     this.segments = this.segments.concat(caster.segments);
+
+		this.segments = ShadowSystem.getSegments(this.horizontalSegments.concat(this.verticalSegments));
 
 		// Lower walls
         this.lowerWalls = this.mergeLowerWalls(this.lowerWalls);
@@ -3124,7 +2968,7 @@ class GameShadow {
     }
 
     getWallHeight(x, y) {
-        let tw = $gameMap.tileWidth(), eps = 0.1; // tw * h + 6 + eps
+        let tw = $gameMap.tileWidth(), eps = 0.0001; // tw * h + 6 + eps
         for (const [x2, y2, x1, y1, h] of this.lowerWalls) {
             if (x >= x1 && x <= x2 && y <= y1 && y >= y2-tw*h) {
                 return y1 - y + eps;
