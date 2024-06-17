@@ -1,11 +1,13 @@
 [
 null,
-{"id":1,"expanded":true,"name":"Jardim","order":3,"parentId":0,"scrollX":1104,"scrollY":686},
-{"id":2,"expanded":false,"name":"Inicio Cutscene","order":5,"parentId":0,"scrollX":832,"scrollY":640},
-{"id":3,"expanded":true,"name":"Sala do Trono","order":1,"parentId":0,"scrollX":1092,"scrollY":609.3333333333334},
+{"id":1,"expanded":true,"name":"Jardim","order":3,"parentId":0,"scrollX":1279.2,"scrollY":508.79999999999995},
+{"id":2,"expanded":false,"name":"Inicio Cutscene","order":5,"parentId":0,"scrollX":650.4,"scrollY":361.2},
+{"id":3,"expanded":true,"name":"Sala do Trono","order":1,"parentId":0,"scrollX":799.1999999999999,"scrollY":508.79999999999995},
 {"id":4,"expanded":true,"name":"Sala de Invocação","order":2,"parentId":0,"scrollX":1228.5,"scrollY":685.5},
-{"id":5,"expanded":false,"name":"Biblioteca 1","order":4,"parentId":0,"scrollX":832,"scrollY":640},
+{"id":5,"expanded":false,"name":"Biblioteca 1","order":4,"parentId":0,"scrollX":929.1428571428571,"scrollY":516},
 {"id":6,"expanded":true,"name":"Sala de Invocação Cutscene","order":6,"parentId":0,"scrollX":832,"scrollY":640},
 {"id":7,"expanded":true,"name":"Sala do Trono Cutscene","order":7,"parentId":0,"scrollX":1092,"scrollY":609.3333333333334},
-{"id":8,"expanded":true,"name":"Jardim Cutscene","order":8,"parentId":0,"scrollX":1390.2857142857142,"scrollY":781.7142857142857}
+{"id":8,"expanded":true,"name":"Jardim Cutscene","order":8,"parentId":0,"scrollX":1165.0909090909092,"scrollY":1029.8181818181818},
+{"id":9,"expanded":true,"name":"Biblioteca 2","order":9,"parentId":0,"scrollX":1171.5,"scrollY":840},
+{"id":10,"expanded":false,"name":"Casa de Aldeia 2º Andar","order":10,"parentId":0,"scrollX":813,"scrollY":451.5}
 ]
