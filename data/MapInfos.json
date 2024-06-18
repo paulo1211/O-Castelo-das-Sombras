@@ -1,13 +1,13 @@
 [
 null,
-{"id":1,"expanded":true,"name":"Jardim","order":3,"parentId":0,"scrollX":1059,"scrollY":1011},
-{"id":2,"expanded":false,"name":"Inicio Cutscene","order":5,"parentId":0,"scrollX":832,"scrollY":640},
+{"id":1,"expanded":true,"name":"Jardim","order":3,"parentId":0,"scrollX":1109,"scrollY":1123},
+{"id":2,"expanded":false,"name":"Inicio Cutscene","order":5,"parentId":0,"scrollX":819,"scrollY":457},
 {"id":3,"expanded":true,"name":"Sala do Trono","order":1,"parentId":0,"scrollX":811,"scrollY":599},
-{"id":4,"expanded":true,"name":"Sala de Invocação","order":2,"parentId":0,"scrollX":811,"scrollY":640},
+{"id":4,"expanded":true,"name":"Sala de Invocação","order":2,"parentId":0,"scrollX":832,"scrollY":640},
 {"id":5,"expanded":false,"name":"Biblioteca 1","order":4,"parentId":0,"scrollX":819,"scrollY":457},
 {"id":6,"expanded":true,"name":"Sala de Invocação Cutscene","order":6,"parentId":0,"scrollX":811,"scrollY":640},
 {"id":7,"expanded":true,"name":"Sala do Trono Cutscene","order":7,"parentId":0,"scrollX":811,"scrollY":599},
-null,
+{"id":8,"expanded":false,"name":"Fim de jogo","order":10,"parentId":0,"scrollX":819,"scrollY":457},
 {"id":9,"expanded":true,"name":"Biblioteca 2","order":8,"parentId":0,"scrollX":1404,"scrollY":716},
-{"id":10,"expanded":false,"name":"Encontro com a Vidente","order":9,"parentId":0,"scrollX":832,"scrollY":640}
+{"id":10,"expanded":false,"name":"Encontro com a Vidente","order":9,"parentId":0,"scrollX":819,"scrollY":457}
 ]
